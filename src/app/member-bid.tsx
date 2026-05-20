@@ -44,6 +44,38 @@ export default function MemberBidScreen() {
         }
     };
 
+    const getLowestBid = (group: any) => {
+        if (!group?.bids || group.bids.length === 0) return null;
+
+        return Math.min(
+            ...group.bids.map((bid: any) => Number(bid.bid_amount))
+        );
+    };
+
+    const getBaseBidAmount = (group: any) => {
+        const lowestBid = getLowestBid(group);
+
+        if (lowestBid !== null) {
+            return lowestBid;
+        }
+
+        return Number(group?.open_round?.max_bid_amount || 0);
+    };
+
+    const selectBidAmount = (minusAmount: number) => {
+        if (!selectedGroup) return;
+
+        const baseAmount = getBaseBidAmount(selectedGroup);
+        const finalAmount = baseAmount - minusAmount;
+
+        if (finalAmount <= 0) {
+            Alert.alert("Validation", "Bid amount is invalid.");
+            return;
+        }
+
+        setBidAmount(String(finalAmount));
+    };
+
     const placeBid = async () => {
         if (!selectedGroup) {
             Alert.alert("Validation", "Please select a group");
@@ -76,6 +108,16 @@ export default function MemberBidScreen() {
 
         if (amount > maxBid) {
             Alert.alert("Validation", `Bid amount cannot be greater than ${maxBid}`);
+            return;
+        }
+
+        const lowestBid = getLowestBid(selectedGroup);
+
+        if (lowestBid !== null && amount >= lowestBid) {
+            Alert.alert(
+                "Validation",
+                `Your bid must be lower than the current lowest bid: ${lowestBid}`
+            );
             return;
         }
 
@@ -170,6 +212,38 @@ export default function MemberBidScreen() {
                             <Text>Already Bid: {group.already_bid ? "Yes" : "No"}</Text>
                             <Text>Reason: {group.not_eligible_reason || "-"}</Text>
 
+                            <Text style={{ fontWeight: "800", marginTop: 10 }}>
+                                Bid History
+                            </Text>
+
+                            {group.bids && group.bids.length > 0 ? (
+                                [...group.bids]
+                                    .sort(
+                                        (a: any, b: any) =>
+                                            new Date(a.created_at).getTime() -
+                                            new Date(b.created_at).getTime()
+                                    )
+                                    .map((bid: any, index: number) => (
+                                        <View
+                                            key={index}
+                                            style={{
+                                                marginTop: 8,
+                                                paddingBottom: 8,
+                                                borderBottomWidth: 1,
+                                                borderBottomColor: "#e5e5e5",
+                                            }}
+                                        >
+                                            <Text style={{ fontWeight: "700" }}>
+                                                #{index + 1} {bid.full_name}
+                                            </Text>
+                                            <Text>Bid Amount: {bid.bid_amount}</Text>
+                                            <Text>Date: {bid.created_at}</Text>
+                                        </View>
+                                    ))
+                            ) : (
+                                <Text>No bid history yet.</Text>
+                            )}
+
                             {isSelected ? (
                                 <Text
                                     style={{
@@ -187,41 +261,76 @@ export default function MemberBidScreen() {
             })}
 
             {selectedGroup ? (
-                <AppCard>
-                    <Text style={{ fontSize: 18, fontWeight: "800", marginBottom: 8 }}>
-                        Place Bid
-                    </Text>
+                <>
+                    <AppCard>
+                        <Text style={{ fontSize: 18, fontWeight: "800", marginBottom: 8 }}>
+                            Current Lowest Bid
+                        </Text>
 
-                    {!selectedGroup.open_round ? (
-                        <Text style={{ color: "red", marginBottom: 10 }}>
-                            No open round is available for this group.
-                        </Text>
-                    ) : !selectedGroup.eligible ? (
-                        <Text style={{ color: "red", marginBottom: 10 }}>
-                            You are not eligible to bid in this round.
-                        </Text>
-                    ) : (
-                        <>
-                            <Text style={{ marginBottom: 8 }}>
-                                Maximum allowed bid: {selectedGroup.open_round.max_bid_amount}
+                        {getLowestBid(selectedGroup) !== null ? (
+                            <Text style={{ fontSize: 20, fontWeight: "800", color: "#0d6efd" }}>
+                                {getLowestBid(selectedGroup)}
                             </Text>
+                        ) : (
+                            <Text>No bids placed yet.</Text>
+                        )}
+                    </AppCard>
+                    <AppCard>
+                        <Text style={{ fontSize: 18, fontWeight: "800", marginBottom: 8 }}>
+                            Place Bid
+                        </Text>
 
-                            <AppInput
-                                label="Bid Amount"
-                                value={bidAmount}
-                                onChangeText={setBidAmount}
-                                keyboardType="numeric"
-                                placeholder="Enter your bid amount"
-                            />
+                        {!selectedGroup.open_round ? (
+                            <Text style={{ color: "red", marginBottom: 10 }}>
+                                No open round is available for this group.
+                            </Text>
+                        ) : !selectedGroup.eligible ? (
+                            <Text style={{ color: "red", marginBottom: 10 }}>
+                                You are not eligible to bid in this round.
+                            </Text>
+                        ) : (
+                            <>
+                                <Text style={{ fontWeight: "700", marginBottom: 8 }}>
+                                    Select Bid Amount
+                                </Text>
 
-                            <AppButton
-                                title="Submit Bid"
-                                onPress={placeBid}
-                                loading={loading}
-                            />
-                        </>
-                    )}
-                </AppCard>
+                                {[1000, 2000, 5000, 10000].map((minusAmount) => {
+                                    const baseAmount = getBaseBidAmount(selectedGroup);
+                                    const finalAmount = baseAmount - minusAmount;
+
+                                    return (
+                                        <TouchableOpacity
+                                            key={minusAmount}
+                                            onPress={() => selectBidAmount(minusAmount)}
+                                            style={{
+                                                backgroundColor: bidAmount === String(finalAmount) ? "#0d6efd" : "#f1f1f1",
+                                                padding: 14,
+                                                borderRadius: 10,
+                                                marginBottom: 10,
+                                            }}
+                                        >
+                                            <Text
+                                                style={{
+                                                    fontWeight: "800",
+                                                    color: bidAmount === String(finalAmount) ? "#fff" : "#000",
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                -{minusAmount} = {finalAmount}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+
+                                <AppButton
+                                    title={bidAmount ? `Submit Bid ${bidAmount}` : "Select Bid Amount"}
+                                    onPress={placeBid}
+                                    loading={loading}
+                                />
+                            </>
+                        )}
+                    </AppCard>
+                </>
             ) : null}
         </ScrollView>
     );
