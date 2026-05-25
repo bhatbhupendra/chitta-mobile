@@ -25,6 +25,7 @@ export default function GroupDetailScreen() {
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
     const [memberCode, setMemberCode] = useState("");
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const loadGroup = async () => {
         try {
@@ -81,6 +82,7 @@ export default function GroupDetailScreen() {
                 full_name: fullName.trim(),
                 phone: phone.trim(),
                 member_code: memberCode.trim(),
+                is_admin: isAdmin ? 1 : 0,
             });
 
             if (response.data.success) {
@@ -89,6 +91,7 @@ export default function GroupDetailScreen() {
                 setFullName("");
                 setPhone("");
                 setMemberCode("");
+                setIsAdmin(false);
                 setMemberModalOpen(false);
 
                 loadGroup();
@@ -125,17 +128,13 @@ export default function GroupDetailScreen() {
 
                 <AppButton title="Auto Create Rounds" onPress={autoCreateRounds} />
 
-                <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginVertical: 10,
-                    }}
-                >
-                    <Text style={{ fontSize: 18, fontWeight: "800" }}>
-                        Members
-                    </Text>
+                <View style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginVertical: 10,
+                }}>
+                    <Text style={{ fontSize: 18, fontWeight: "800" }}>Members</Text>
 
                     <TouchableOpacity
                         onPress={() => setMemberModalOpen(true)}
@@ -146,9 +145,7 @@ export default function GroupDetailScreen() {
                             borderRadius: 8,
                         }}
                     >
-                        <Text style={{ color: "#fff", fontWeight: "800" }}>
-                            + Add Member
-                        </Text>
+                        <Text style={{ color: "#fff", fontWeight: "800" }}>+ Add Member</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -162,6 +159,7 @@ export default function GroupDetailScreen() {
                             <Text style={{ fontWeight: "800" }}>{member.full_name}</Text>
                             <Text>Code: {member.member_code || "-"}</Text>
                             <Text>Phone: {member.phone || "-"}</Text>
+                            <Text>Admin: {Number(member.is_admin) === 1 ? "Yes" : "No"}</Text>
                         </AppCard>
                     ))
                 )}
@@ -198,34 +196,18 @@ export default function GroupDetailScreen() {
                 animationType="slide"
                 onRequestClose={() => setMemberModalOpen(false)}
             >
-                <View
-                    style={{
-                        flex: 1,
-                        backgroundColor: "rgba(0,0,0,0.4)",
-                        justifyContent: "center",
-                        padding: 20,
-                    }}
-                >
-                    <View
-                        style={{
-                            backgroundColor: "#fff",
-                            borderRadius: 14,
-                            padding: 18,
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: 20,
-                                fontWeight: "800",
-                                marginBottom: 14,
-                            }}
-                        >
+                <View style={{
+                    flex: 1,
+                    backgroundColor: "rgba(0,0,0,0.4)",
+                    justifyContent: "center",
+                    padding: 20,
+                }}>
+                    <View style={{ backgroundColor: "#fff", borderRadius: 14, padding: 18 }}>
+                        <Text style={{ fontSize: 20, fontWeight: "800", marginBottom: 14 }}>
                             Add Member
                         </Text>
 
-                        <Text style={{ fontWeight: "700", marginBottom: 5 }}>
-                            Full Name *
-                        </Text>
+                        <Text style={{ fontWeight: "700", marginBottom: 5 }}>Full Name *</Text>
                         <TextInput
                             value={fullName}
                             onChangeText={setFullName}
@@ -233,9 +215,7 @@ export default function GroupDetailScreen() {
                             style={inputStyle}
                         />
 
-                        <Text style={{ fontWeight: "700", marginBottom: 5 }}>
-                            Phone
-                        </Text>
+                        <Text style={{ fontWeight: "700", marginBottom: 5 }}>Phone</Text>
                         <TextInput
                             value={phone}
                             onChangeText={setPhone}
@@ -244,9 +224,7 @@ export default function GroupDetailScreen() {
                             style={inputStyle}
                         />
 
-                        <Text style={{ fontWeight: "700", marginBottom: 5 }}>
-                            Member Code
-                        </Text>
+                        <Text style={{ fontWeight: "700", marginBottom: 5 }}>Member Code</Text>
                         <TextInput
                             value={memberCode}
                             onChangeText={setMemberCode}
@@ -254,13 +232,25 @@ export default function GroupDetailScreen() {
                             style={inputStyle}
                         />
 
-                        <View
+                        <TouchableOpacity
+                            onPress={() => setIsAdmin(!isAdmin)}
                             style={{
-                                flexDirection: "row",
-                                gap: 10,
-                                marginTop: 10,
+                                backgroundColor: isAdmin ? "#1677ff" : "#ddd",
+                                padding: 13,
+                                borderRadius: 10,
+                                alignItems: "center",
+                                marginBottom: 12,
                             }}
                         >
+                            <Text style={{
+                                color: isAdmin ? "#fff" : "#000",
+                                fontWeight: "800",
+                            }}>
+                                {isAdmin ? "✓ Admin Member" : "Make This Member Admin"}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
                             <TouchableOpacity
                                 onPress={() => setMemberModalOpen(false)}
                                 style={{
@@ -284,9 +274,7 @@ export default function GroupDetailScreen() {
                                     alignItems: "center",
                                 }}
                             >
-                                <Text style={{ color: "#fff", fontWeight: "800" }}>
-                                    Save
-                                </Text>
+                                <Text style={{ color: "#fff", fontWeight: "800" }}>Save</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
