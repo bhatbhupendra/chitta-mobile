@@ -1,11 +1,17 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, ScrollView, Text } from "react-native";
+import {
+    Alert,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    StyleSheet,
+} from "react-native";
 import { AxiosError } from "axios";
 
 import apiClient from "../api/apiClient";
-import AppButton from "../components/AppButton";
-import AppInput from "../components/AppInput";
 
 export default function GroupCreateScreen() {
     const [groupName, setGroupName] = useState("");
@@ -36,10 +42,7 @@ export default function GroupCreateScreen() {
         }
 
         if (members <= 0 || duration <= 0 || amount <= 0) {
-            Alert.alert(
-                "Validation",
-                "Member count, duration months, and amount must be greater than 0"
-            );
+            Alert.alert("Validation", "Member count, duration months, and amount must be greater than 0");
             return;
         }
 
@@ -66,97 +69,185 @@ export default function GroupCreateScreen() {
                 start_date: startDate,
             };
 
-            console.log("Sending payload:", payload);
-
             const response = await apiClient.post("/groups_create.php", payload);
-
-            console.log("API response:", response.data);
 
             if (response.data.success) {
                 Alert.alert("Success", "Group created successfully");
                 router.back();
             } else {
-                Alert.alert(
-                    "Error",
-                    response.data.message || "Failed to create group"
-                );
+                Alert.alert("Error", response.data.message || "Failed to create group");
             }
         } catch (error) {
             const err = error as AxiosError<any>;
-
-            console.log("Create group error:", err.message);
-            console.log("Server error:", err.response?.data);
-            console.log("Status:", err.response?.status);
-
-            Alert.alert(
-                "Error",
-                err.response?.data?.message ||
-                err.message ||
-                "Could not connect to server"
-            );
+            Alert.alert("Error", err.response?.data?.message || err.message || "Could not connect to server");
         } finally {
             setLoading(false);
         }
     };
 
+    const Field = ({ label, value, onChangeText, keyboardType = "default", icon }: any) => (
+        <View style={styles.fieldCard}>
+            <View style={styles.labelRow}>
+                <Text style={styles.fieldIcon}>{icon}</Text>
+                <Text style={styles.label}>{label}</Text>
+            </View>
+            <TextInput
+                style={styles.input}
+                value={value}
+                onChangeText={onChangeText}
+                keyboardType={keyboardType}
+                placeholderTextColor="#9CA3AF"
+            />
+        </View>
+    );
+
     return (
-        <ScrollView style={{ flex: 1, padding: 16 }}>
-            <Text style={{ marginBottom: 14, color: "#666" }}>
-                Chitta fund amount means total group fund amount, not per-member
-                payment.
-            </Text>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+        >
+            <View style={styles.infoBox}>
+                <Text style={styles.infoIcon}>💡</Text>
+                <Text style={styles.infoText}>
+                    Chitta fund amount means total group fund amount, not per-member payment.
+                </Text>
+            </View>
 
-            <AppInput
-                label="Group Name"
-                value={groupName}
-                onChangeText={setGroupName}
-            />
+            <View style={styles.formCard}>
+                <Field label="Group Name" value={groupName} onChangeText={setGroupName} icon="👥" />
 
-            <AppInput
-                label="Currency"
-                value={currency}
-                onChangeText={setCurrency}
-            />
+                <Field label="Currency" value={currency} onChangeText={setCurrency} icon="💱" />
 
-            <AppInput
-                label="Member Count"
-                value={memberCount}
-                onChangeText={setMemberCount}
-                keyboardType="numeric"
-            />
+                <Field
+                    label="Member Count"
+                    value={memberCount}
+                    onChangeText={setMemberCount}
+                    keyboardType="numeric"
+                    icon="👤"
+                />
 
-            <AppInput
-                label="Duration Months"
-                value={durationMonths}
-                onChangeText={setDurationMonths}
-                keyboardType="numeric"
-            />
+                <Field
+                    label="Duration Months"
+                    value={durationMonths}
+                    onChangeText={setDurationMonths}
+                    keyboardType="numeric"
+                    icon="📅"
+                />
 
-            <AppInput
-                label="Chitta Fund Amount"
-                value={monthlyAmount}
-                onChangeText={setMonthlyAmount}
-                keyboardType="numeric"
-            />
+                <Field
+                    label="Chitta Fund Amount"
+                    value={monthlyAmount}
+                    onChangeText={setMonthlyAmount}
+                    keyboardType="numeric"
+                    icon="💰"
+                />
 
-            <AppInput
-                label="Bid Step Percent"
-                value={bidStepPercent}
-                onChangeText={setBidStepPercent}
-                keyboardType="numeric"
-            />
+                <Field
+                    label="Bid Step Percent"
+                    value={bidStepPercent}
+                    onChangeText={setBidStepPercent}
+                    keyboardType="numeric"
+                    icon="📈"
+                />
 
-            <AppInput
-                label="Start Date YYYY-MM-DD"
-                value={startDate}
-                onChangeText={setStartDate}
-            />
+                <Field label="Start Date YYYY-MM-DD" value={startDate} onChangeText={setStartDate} icon="🗓️" />
+            </View>
 
-            <AppButton
-                title="Create Group"
+            <TouchableOpacity
+                style={[styles.createButton, loading && { opacity: 0.7 }]}
                 onPress={createGroup}
-                loading={loading}
-            />
+                disabled={loading}
+            >
+                <Text style={styles.createButtonText}>
+                    {loading ? "Creating..." : "Create Group"}
+                </Text>
+            </TouchableOpacity>
         </ScrollView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#F5F6FA",
+    },
+    content: {
+        padding: 16,
+        paddingBottom: 30,
+    },
+    infoBox: {
+        backgroundColor: "#EAF1FF",
+        borderRadius: 18,
+        padding: 16,
+        flexDirection: "row",
+        marginBottom: 16,
+    },
+    infoIcon: {
+        fontSize: 22,
+        marginRight: 10,
+    },
+    infoText: {
+        flex: 1,
+        color: "#374151",
+        fontSize: 14,
+        lineHeight: 20,
+        fontWeight: "600",
+    },
+    formCard: {
+        backgroundColor: "#FFFFFF",
+        borderRadius: 22,
+        padding: 16,
+        marginBottom: 18,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
+        elevation: 3,
+    },
+    fieldCard: {
+        marginBottom: 15,
+    },
+    labelRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    fieldIcon: {
+        fontSize: 17,
+        marginRight: 8,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: "800",
+        color: "#111827",
+    },
+    input: {
+        height: 52,
+        backgroundColor: "#F9FAFB",
+        borderWidth: 1,
+        borderColor: "#E5E7EB",
+        borderRadius: 15,
+        paddingHorizontal: 15,
+        fontSize: 16,
+        color: "#111827",
+        fontWeight: "600",
+    },
+    createButton: {
+        height: 60,
+        backgroundColor: "#1E63F3",
+        borderRadius: 18,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowColor: "#1E63F3",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+        elevation: 5,
+    },
+    createButtonText: {
+        color: "#FFFFFF",
+        fontSize: 17,
+        fontWeight: "900",
+    },
+});

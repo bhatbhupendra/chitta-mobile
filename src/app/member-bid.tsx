@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import apiClient from "../api/apiClient";
 import AppButton from "../components/AppButton";
-import AppCard from "../components/AppCard";
 import AppInput from "../components/AppInput";
 
 export default function MemberBidScreen() {
@@ -47,9 +46,7 @@ export default function MemberBidScreen() {
     const getLowestBid = (group: any) => {
         if (!group?.bids || group.bids.length === 0) return null;
 
-        return Math.min(
-            ...group.bids.map((bid: any) => Number(bid.bid_amount))
-        );
+        return Math.min(...group.bids.map((bid: any) => Number(bid.bid_amount)));
     };
 
     const getBaseBidAmount = (group: any) => {
@@ -149,70 +146,186 @@ export default function MemberBidScreen() {
     };
 
     return (
-        <ScrollView style={{ flex: 1, padding: 16 }}>
-            <Text style={{ fontSize: 24, fontWeight: "800", marginBottom: 8 }}>
-                Member Self Bid
-            </Text>
+        <ScrollView
+            style={{ flex: 1, backgroundColor: "#f4f6fb" }}
+            contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        >
+            <View
+                style={{
+                    backgroundColor: "#111827",
+                    borderRadius: 24,
+                    padding: 20,
+                    marginBottom: 16,
+                }}
+            >
+                <Text style={{ color: "#fff", fontSize: 26, fontWeight: "900" }}>
+                    Member Self Bid
+                </Text>
+                <Text style={{ color: "#cbd5e1", marginTop: 6, lineHeight: 20 }}>
+                    Enter your member code, select your group, and place your lowest bid.
+                </Text>
+            </View>
 
-            <Text style={{ color: "#666", marginBottom: 14 }}>
-                Enter your member code to see your groups and place a bid.
-            </Text>
+            <View
+                style={{
+                    backgroundColor: "#fff",
+                    borderRadius: 20,
+                    padding: 16,
+                    marginBottom: 16,
+                    shadowColor: "#000",
+                    shadowOpacity: 0.06,
+                    shadowRadius: 12,
+                    elevation: 3,
+                }}
+            >
+                <AppInput
+                    label="Member Code"
+                    value={memberCode}
+                    onChangeText={setMemberCode}
+                    placeholder="Example: RAM12345678"
+                />
 
-            <AppInput
-                label="Member Code"
-                value={memberCode}
-                onChangeText={setMemberCode}
-                placeholder="Example: RAM12345678"
-            />
-
-            <AppButton title="Search" onPress={lookupMember} loading={loading} />
+                <AppButton title="Search" onPress={lookupMember} loading={loading} />
+            </View>
 
             {member ? (
-                <AppCard>
-                    <Text style={{ fontSize: 18, fontWeight: "800" }}>
+                <View
+                    style={{
+                        backgroundColor: "#ecfdf5",
+                        borderRadius: 18,
+                        padding: 16,
+                        marginBottom: 16,
+                        borderWidth: 1,
+                        borderColor: "#bbf7d0",
+                    }}
+                >
+                    <Text style={{ fontSize: 13, color: "#047857", fontWeight: "800" }}>
+                        MEMBER FOUND
+                    </Text>
+                    <Text style={{ fontSize: 22, fontWeight: "900", color: "#064e3b", marginTop: 4 }}>
                         {member.full_name}
                     </Text>
-                    <Text>Code: {member.member_code}</Text>
-                </AppCard>
+                    <Text style={{ color: "#065f46", marginTop: 4 }}>
+                        Code: {member.member_code}
+                    </Text>
+                </View>
             ) : null}
 
             {groups.map((group) => {
                 const isSelected = selectedGroup?.group_id === group.group_id;
+                const lowestBid = getLowestBid(group);
 
                 return (
                     <TouchableOpacity
                         key={group.group_id}
+                        activeOpacity={0.85}
                         onPress={() => {
                             setSelectedGroup(group);
                             setBidAmount("");
                         }}
                     >
-                        <AppCard>
-                            <Text style={{ fontSize: 18, fontWeight: "800" }}>
-                                {group.group_name}
-                            </Text>
+                        <View
+                            style={{
+                                backgroundColor: "#fff",
+                                borderRadius: 22,
+                                padding: 16,
+                                marginBottom: 14,
+                                borderWidth: isSelected ? 2 : 1,
+                                borderColor: isSelected ? "#2563eb" : "#e5e7eb",
+                                shadowColor: "#000",
+                                shadowOpacity: 0.05,
+                                shadowRadius: 10,
+                                elevation: 2,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    marginBottom: 12,
+                                }}
+                            >
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ fontSize: 20, fontWeight: "900", color: "#111827" }}>
+                                        {group.group_name}
+                                    </Text>
+                                    <Text style={{ color: "#6b7280", marginTop: 3 }}>
+                                        Fund Amount: {group.fund_amount}
+                                    </Text>
+                                </View>
 
-                            <Text>Fund Amount: {group.fund_amount}</Text>
+                                <View
+                                    style={{
+                                        backgroundColor: group.eligible ? "#dcfce7" : "#fee2e2",
+                                        paddingHorizontal: 10,
+                                        paddingVertical: 6,
+                                        borderRadius: 999,
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            color: group.eligible ? "#166534" : "#991b1b",
+                                            fontWeight: "900",
+                                            fontSize: 12,
+                                        }}
+                                    >
+                                        {group.eligible ? "ELIGIBLE" : "NOT ELIGIBLE"}
+                                    </Text>
+                                </View>
+                            </View>
 
-                            <Text>
-                                Open Round:{" "}
-                                {group.open_round ? group.open_round.round_no : "No open round"}
-                            </Text>
+                            <View style={{ flexDirection: "row", gap: 10, marginBottom: 12 }}>
+                                <View
+                                    style={{
+                                        flex: 1,
+                                        backgroundColor: "#f8fafc",
+                                        borderRadius: 14,
+                                        padding: 12,
+                                    }}
+                                >
+                                    <Text style={{ color: "#64748b", fontSize: 12 }}>Open Round</Text>
+                                    <Text style={{ fontWeight: "900", fontSize: 16, marginTop: 2 }}>
+                                        {group.open_round ? group.open_round.round_no : "-"}
+                                    </Text>
+                                </View>
 
-                            <Text>
-                                Max Bid:{" "}
-                                {group.open_round ? group.open_round.max_bid_amount : "-"}
-                            </Text>
+                                <View
+                                    style={{
+                                        flex: 1,
+                                        backgroundColor: "#f8fafc",
+                                        borderRadius: 14,
+                                        padding: 12,
+                                    }}
+                                >
+                                    <Text style={{ color: "#64748b", fontSize: 12 }}>Max Bid</Text>
+                                    <Text style={{ fontWeight: "900", fontSize: 16, marginTop: 2 }}>
+                                        {group.open_round ? group.open_round.max_bid_amount : "-"}
+                                    </Text>
+                                </View>
 
-                            <Text>Eligible Raw: {String(group.eligible)}</Text>
-                            <Text>Eligible: {group.eligible === true ? "Yes" : "No"}</Text>
+                                <View
+                                    style={{
+                                        flex: 1,
+                                        backgroundColor: "#f8fafc",
+                                        borderRadius: 14,
+                                        padding: 12,
+                                    }}
+                                >
+                                    <Text style={{ color: "#64748b", fontSize: 12 }}>Lowest</Text>
+                                    <Text style={{ fontWeight: "900", fontSize: 16, marginTop: 2 }}>
+                                        {lowestBid !== null ? lowestBid : "-"}
+                                    </Text>
+                                </View>
+                            </View>
 
-                            {/* Put these here for debugging */}
-                            <Text>Already Paid: {group.already_paid ? "Yes" : "No"}</Text>
-                            <Text>Already Bid: {group.already_bid ? "Yes" : "No"}</Text>
-                            <Text>Reason: {group.not_eligible_reason || "-"}</Text>
+                            {group.not_eligible_reason ? (
+                                <Text style={{ color: "#dc2626", fontWeight: "700", marginBottom: 10 }}>
+                                    Reason: {group.not_eligible_reason}
+                                </Text>
+                            ) : null}
 
-                            <Text style={{ fontWeight: "800", marginTop: 10 }}>
+                            <Text style={{ fontWeight: "900", fontSize: 16, marginBottom: 8 }}>
                                 Bid History
                             </Text>
 
@@ -227,93 +340,137 @@ export default function MemberBidScreen() {
                                         <View
                                             key={index}
                                             style={{
-                                                marginTop: 8,
-                                                paddingBottom: 8,
-                                                borderBottomWidth: 1,
-                                                borderBottomColor: "#e5e5e5",
+                                                backgroundColor: "#f9fafb",
+                                                borderRadius: 14,
+                                                padding: 12,
+                                                marginBottom: 8,
+                                                borderWidth: 1,
+                                                borderColor: "#eef2f7",
                                             }}
                                         >
-                                            <Text style={{ fontWeight: "700" }}>
-                                                #{index + 1} {bid.full_name}
+                                            <View
+                                                style={{
+                                                    flexDirection: "row",
+                                                    justifyContent: "space-between",
+                                                }}
+                                            >
+                                                <Text style={{ fontWeight: "900", color: "#111827" }}>
+                                                    #{index + 1} {bid.full_name}
+                                                </Text>
+                                                <Text style={{ fontWeight: "900", color: "#2563eb" }}>
+                                                    {bid.bid_amount}
+                                                </Text>
+                                            </View>
+                                            <Text style={{ color: "#6b7280", marginTop: 4 }}>
+                                                {bid.created_at}
                                             </Text>
-                                            <Text>Bid Amount: {bid.bid_amount}</Text>
-                                            <Text>Date: {bid.created_at}</Text>
                                         </View>
                                     ))
                             ) : (
-                                <Text>No bid history yet.</Text>
+                                <Text style={{ color: "#6b7280" }}>No bid history yet.</Text>
                             )}
 
                             {isSelected ? (
-                                <Text
+                                <View
                                     style={{
-                                        color: "#0d6efd",
-                                        fontWeight: "800",
-                                        marginTop: 6,
+                                        marginTop: 10,
+                                        backgroundColor: "#dbeafe",
+                                        borderRadius: 14,
+                                        padding: 10,
                                     }}
                                 >
-                                    Selected
-                                </Text>
+                                    <Text
+                                        style={{
+                                            color: "#1d4ed8",
+                                            fontWeight: "900",
+                                            textAlign: "center",
+                                        }}
+                                    >
+                                        Selected Group
+                                    </Text>
+                                </View>
                             ) : null}
-                        </AppCard>
+                        </View>
                     </TouchableOpacity>
                 );
             })}
 
             {selectedGroup ? (
                 <>
-                    <AppCard>
-                        <Text style={{ fontSize: 18, fontWeight: "800", marginBottom: 8 }}>
+                    <View
+                        style={{
+                            backgroundColor: "#111827",
+                            borderRadius: 22,
+                            padding: 18,
+                            marginTop: 4,
+                            marginBottom: 14,
+                        }}
+                    >
+                        <Text style={{ color: "#cbd5e1", fontWeight: "700" }}>
                             Current Lowest Bid
                         </Text>
 
-                        {getLowestBid(selectedGroup) !== null ? (
-                            <Text style={{ fontSize: 20, fontWeight: "800", color: "#0d6efd" }}>
-                                {getLowestBid(selectedGroup)}
-                            </Text>
-                        ) : (
-                            <Text>No bids placed yet.</Text>
-                        )}
-                    </AppCard>
-                    <AppCard>
-                        <Text style={{ fontSize: 18, fontWeight: "800", marginBottom: 8 }}>
+                        <Text style={{ color: "#fff", fontSize: 30, fontWeight: "900", marginTop: 4 }}>
+                            {getLowestBid(selectedGroup) !== null
+                                ? getLowestBid(selectedGroup)
+                                : "No bids yet"}
+                        </Text>
+                    </View>
+
+                    <View
+                        style={{
+                            backgroundColor: "#fff",
+                            borderRadius: 22,
+                            padding: 16,
+                            shadowColor: "#000",
+                            shadowOpacity: 0.06,
+                            shadowRadius: 12,
+                            elevation: 3,
+                        }}
+                    >
+                        <Text style={{ fontSize: 20, fontWeight: "900", marginBottom: 12 }}>
                             Place Bid
                         </Text>
 
                         {!selectedGroup.open_round ? (
-                            <Text style={{ color: "red", marginBottom: 10 }}>
+                            <Text style={{ color: "#dc2626", fontWeight: "700" }}>
                                 No open round is available for this group.
                             </Text>
                         ) : !selectedGroup.eligible ? (
-                            <Text style={{ color: "red", marginBottom: 10 }}>
+                            <Text style={{ color: "#dc2626", fontWeight: "700" }}>
                                 You are not eligible to bid in this round.
                             </Text>
                         ) : (
                             <>
-                                <Text style={{ fontWeight: "700", marginBottom: 8 }}>
-                                    Select Bid Amount
+                                <Text style={{ color: "#6b7280", marginBottom: 10 }}>
+                                    Choose how much lower you want to bid from the current base amount.
                                 </Text>
 
                                 {[1000, 2000, 5000, 10000].map((minusAmount) => {
                                     const baseAmount = getBaseBidAmount(selectedGroup);
                                     const finalAmount = baseAmount - minusAmount;
+                                    const active = bidAmount === String(finalAmount);
 
                                     return (
                                         <TouchableOpacity
                                             key={minusAmount}
+                                            activeOpacity={0.85}
                                             onPress={() => selectBidAmount(minusAmount)}
                                             style={{
-                                                backgroundColor: bidAmount === String(finalAmount) ? "#0d6efd" : "#f1f1f1",
-                                                padding: 14,
-                                                borderRadius: 10,
+                                                backgroundColor: active ? "#2563eb" : "#f1f5f9",
+                                                padding: 15,
+                                                borderRadius: 16,
                                                 marginBottom: 10,
+                                                borderWidth: 1,
+                                                borderColor: active ? "#2563eb" : "#e2e8f0",
                                             }}
                                         >
                                             <Text
                                                 style={{
-                                                    fontWeight: "800",
-                                                    color: bidAmount === String(finalAmount) ? "#fff" : "#000",
+                                                    fontWeight: "900",
+                                                    color: active ? "#fff" : "#111827",
                                                     textAlign: "center",
+                                                    fontSize: 16,
                                                 }}
                                             >
                                                 -{minusAmount} = {finalAmount}
@@ -329,7 +486,7 @@ export default function MemberBidScreen() {
                                 />
                             </>
                         )}
-                    </AppCard>
+                    </View>
                 </>
             ) : null}
         </ScrollView>
