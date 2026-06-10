@@ -68,6 +68,24 @@ export default function GroupDetailScreen() {
         }
     };
 
+    const generateMemberCode = () => {
+        const now = new Date();
+
+        const pad = (n: number) => String(n).padStart(2, "0");
+
+        const dateTimeNumber =
+            now.getFullYear().toString() +
+            pad(now.getMonth() + 1) +
+            pad(now.getDate()) +
+            pad(now.getHours()) +
+            pad(now.getMinutes()) +
+            pad(now.getSeconds());
+
+        const code = `M-${groupId}-${dateTimeNumber}`;
+
+        setMemberCode(code);
+    };
+
     const addMember = async () => {
         if (!fullName.trim()) {
             Alert.alert("Validation Error", "Member name is required");
@@ -220,7 +238,19 @@ export default function GroupDetailScreen() {
                         <TextInput value={phone} onChangeText={setPhone} placeholder="Enter phone number" keyboardType="phone-pad" style={styles.input} />
 
                         <Text style={styles.label}>Member Code</Text>
-                        <TextInput value={memberCode} onChangeText={setMemberCode} placeholder="Example: M001" style={styles.input} />
+
+                        <View style={styles.codeRow}>
+                            <TextInput
+                                value={memberCode}
+                                onChangeText={setMemberCode}
+                                placeholder="Click Generate Code"
+                                style={[styles.input, styles.codeInput]}
+                            />
+
+                            <TouchableOpacity onPress={generateMemberCode} style={styles.generateButton}>
+                                <Text style={styles.generateButtonText}>Generate</Text>
+                            </TouchableOpacity>
+                        </View>
 
                         <TouchableOpacity
                             onPress={() => setIsAdmin(!isAdmin)}
@@ -395,4 +425,24 @@ const styles = StyleSheet.create({
     },
     cancelText: { fontWeight: "900", color: "#111827" },
     saveText: { color: "#fff", fontWeight: "900" },
+    codeRow: {
+        flexDirection: "row",
+        gap: 8,
+        alignItems: "center",
+        marginBottom: 12,
+    },
+    codeInput: {
+        flex: 1,
+        marginBottom: 0,
+    },
+    generateButton: {
+        backgroundColor: "#0A8F3C",
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        borderRadius: 14,
+    },
+    generateButtonText: {
+        color: "#fff",
+        fontWeight: "900",
+    },
 });

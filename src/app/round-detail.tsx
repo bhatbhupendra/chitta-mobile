@@ -409,11 +409,13 @@ export default function RoundDetailScreen() {
                             <View style={[
                                 styles.statusBadge,
                                 item.status === "paid" && styles.statusBadgePaid,
+                                item.status === "fine" && styles.statusBadgeFine,
                                 { marginTop: 4 },
                             ]}>
                                 <Text style={[
                                     styles.statusText,
                                     item.status === "paid" && styles.statusTextPaid,
+                                    item.status === "fine" && styles.statusTextFine,
                                 ]}>
                                     {item.status}
                                 </Text>
@@ -426,11 +428,19 @@ export default function RoundDetailScreen() {
                             >
                                 <Text style={styles.paidButtonText}>Paid</Text>
                             </TouchableOpacity>
+
                             <TouchableOpacity
                                 style={styles.dueButton}
                                 onPress={() => togglePayment(item.id, "due")}
                             >
                                 <Text style={styles.dueButtonText}>Due</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.fineButton}
+                                onPress={() => togglePayment(item.id, "fine")}
+                            >
+                                <Text style={styles.fineButtonText}>Fine</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -718,4 +728,21 @@ const styles = StyleSheet.create({
 
     emptyCard: { backgroundColor: "#fff", padding: 18, borderRadius: 18, marginBottom: 14 },
     emptyText: { color: "#6B7280", fontWeight: "700" },
+    fineButton: {
+        backgroundColor: "#FEE2E2",
+        paddingVertical: 7,
+        paddingHorizontal: 14,
+        borderRadius: 12,
+    },
+    fineButtonText: {
+        color: "#DC2626",
+        fontWeight: "900",
+        fontSize: 13,
+    },
+    statusBadgeFine: {
+        backgroundColor: "#FEE2E2",
+    },
+    statusTextFine: {
+        color: "#DC2626",
+    },
 });

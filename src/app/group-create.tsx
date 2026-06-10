@@ -13,6 +13,22 @@ import { AxiosError } from "axios";
 
 import apiClient from "../api/apiClient";
 
+const Field = ({ label, value, onChangeText, keyboardType = "default", icon }: any) => (
+    <View style={styles.fieldCard}>
+        <View style={styles.labelRow}>
+            <Text style={styles.fieldIcon}>{icon}</Text>
+            <Text style={styles.label}>{label}</Text>
+        </View>
+        <TextInput
+            style={styles.input}
+            value={value}
+            onChangeText={onChangeText}
+            keyboardType={keyboardType}
+            placeholderTextColor="#9CA3AF"
+        />
+    </View>
+);
+
 export default function GroupCreateScreen() {
     const [groupName, setGroupName] = useState("");
     const [currency, setCurrency] = useState("NPR");
@@ -73,7 +89,7 @@ export default function GroupCreateScreen() {
 
             if (response.data.success) {
                 Alert.alert("Success", "Group created successfully");
-                router.back();
+                router.replace("/groups");
             } else {
                 Alert.alert("Error", response.data.message || "Failed to create group");
             }
@@ -84,22 +100,6 @@ export default function GroupCreateScreen() {
             setLoading(false);
         }
     };
-
-    const Field = ({ label, value, onChangeText, keyboardType = "default", icon }: any) => (
-        <View style={styles.fieldCard}>
-            <View style={styles.labelRow}>
-                <Text style={styles.fieldIcon}>{icon}</Text>
-                <Text style={styles.label}>{label}</Text>
-            </View>
-            <TextInput
-                style={styles.input}
-                value={value}
-                onChangeText={onChangeText}
-                keyboardType={keyboardType}
-                placeholderTextColor="#9CA3AF"
-            />
-        </View>
-    );
 
     return (
         <ScrollView
